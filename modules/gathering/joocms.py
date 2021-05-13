@@ -5,9 +5,9 @@ import requests
 # Find Joomla version and check it on exploit-db
 
 
-def joo_version(url, headers):
+def joo_version(url, headers, verify=False):
     endpoint = url + "/administrator/manifests/files" + '/joomla.xml'
-    response = requests.get(endpoint, headers).text
+    response = requests.get(endpoint, headers, verify=False).text
     regex = r'<version>(.+?)</version>'
     pattern = re.compile(regex)
     version = re.findall(pattern, response)
@@ -18,7 +18,7 @@ def joo_version(url, headers):
 def joo_user(url, headers):
     users = []
     endpoint = url + '/?format=feed'
-    response = requests.get(endpoint, headers).text
+    response = requests.get(endpoint, headers, verify=False).text
     regex = r'<author>(.+?) \((.+?)\)</author>'
     pattern = re.compile(regex)
     joouser = re.findall(pattern, response)
@@ -32,11 +32,11 @@ def joo_user(url, headers):
 
 def joo_template(url, headers):
     main_endpoint = url + '/index.php'
-    responsea = requests.get(main_endpoint, headers).text
+    responsea = requests.get(main_endpoint, headers, verify=False).text
     WebTemplates = re.findall("/templates/(.+?)/", responsea)
     WebTemplates = sorted(set(WebTemplates))
     adm_endpoint = url + '/administrator/index.php'
-    responseb = requests.get(adm_endpoint, headers).text
+    responseb = requests.get(adm_endpoint, headers, verify=False).text
     AdminTemplates = re.findall("/administrator/templates/(.+?)/", responseb)
     AdminTemplates = sorted(set(AdminTemplates))
     if WebTemplates:

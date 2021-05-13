@@ -24,7 +24,7 @@ class GatherHost():
 
     def os_server(self):
 
-        response = requests.get(self.url, headers=self.headers).headers
+        response = requests.get(self.url, headers=self.headers, verify=False).headers
         try:
                 regx = re.compile(r"(.+) \((.+)\)")
                 data = regx.search(response["server"])
@@ -38,7 +38,7 @@ class GatherHost():
 
     def web_host(self):
         urldate = "https://input.payapi.io/v1/api/fraud/domain/age/" + hostd(self.url)
-        getinfo = requests.get(urldate, self.headers).text
+        getinfo = requests.get(urldate, self.headers, verify=False).text
         regex_date = r'Date: (.+?)-(.+?)'
         regex_date = re.compile(regex_date)
         matches = re.search(regex_date, getinfo)
@@ -48,7 +48,7 @@ class GatherHost():
                 ip = socket.gethostbyname(hostd(self.url))
                 print(' {0} CloudFlare IP : {1}'.format(good, ip))
                 ipinfo = "http://ipinfo.io/" + ip + "/json"
-                gather = requests.get(ipinfo, self.headers).text
+                gather = requests.get(ipinfo, self.headers, verify=False).text
 
                 self.match_printer('Country',self.match_info(r'country\": \"(.+?)\"',gather))
                 self.match_printer('Region',self.match_info(r'region\": \"(.+?)\"',gather))

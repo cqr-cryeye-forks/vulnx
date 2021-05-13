@@ -8,7 +8,7 @@ from common.colors import B, W, G, good, bad,run
 
 def wp_version(url, headers):
     ep = url
-    getversion = requests.get(ep, headers).text
+    getversion = requests.get(ep, headers, verify=False).text
     # searching version content from the http response. \d{:digit} version form 0.0.0
     matches = re.search(re.compile(
         r'content=\"WordPress (\d{0,9}.\d{0,9}.\d{0,9})?\"'), getversion)
@@ -20,7 +20,7 @@ def wp_version(url, headers):
 def wp_themes(url, headers):
     ep = url
     themes_array = []
-    getthemes = requests.get(ep, headers).text
+    getthemes = requests.get(ep, headers, verify=False).text
     matches = re.findall(re.compile(r'themes/(\w+)?/'), getthemes)
     # loop for matching themes.)
     if len(matches) > 0:
@@ -34,7 +34,7 @@ def wp_themes(url, headers):
 
 def wp_user(url, headers):
     ep = url + '/?author=1'
-    getuser = requests.get(ep, headers).text
+    getuser = requests.get(ep, headers, verify=False).text
     matches = re.search(re.compile(r'author/(\w+)?/'), getuser)
     if matches:
         user = matches.group(1)
@@ -46,7 +46,7 @@ def wp_user(url, headers):
 def wp_plugin(url, headers):
     plugins_array = []
     ep = url
-    getplugin = requests.get(ep, headers).text
+    getplugin = requests.get(ep, headers, verify=False).text
     matches = re.findall(re.compile(r'wp-content/plugins/(\w+)?/'), getplugin)
     if len(matches) > 0:
         for plugin in matches:
