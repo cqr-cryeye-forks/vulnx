@@ -66,7 +66,7 @@ def dnsdumper(url):
     
     domain = hostd(url)
     dnsdumpster_url = 'https://dnsdumpster.com/'
-    response = requests.Session().get(dnsdumpster_url)
+    response = requests.Session().get(dnsdumpster_url, verify=False)
     soup = BeautifulSoup(response.text, 'html.parser')
     # If no match is found, the return object won't have group method, so check.
     try:
@@ -80,8 +80,8 @@ def dnsdumper(url):
     headers = {'Referer': 'https://dnsdumpster.com/'}
     data = {'csrfmiddlewaretoken': csrf_token, 'targetip': domain}
     response = requests.Session().post('https://dnsdumpster.com/',
-                                       cookies=cookies, data=data, headers=headers)
-    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
+                                       cookies=cookies, data=data, headers=headers, verify=False)
+    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain, verify=False)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         tables = soup.findAll('table')
@@ -103,7 +103,7 @@ def dnsdumper(url):
 def domain_info(url):
     domain = hostd(url)
     dnsdumpster_url = 'https://dnsdumpster.com/'
-    response = requests.Session().get(dnsdumpster_url).text
+    response = requests.Session().get(dnsdumpster_url, verify=False).text
     # If no match is found, the return object won't have group method, so check.
     try:
         csrf_token = re.search(
@@ -115,8 +115,8 @@ def domain_info(url):
     headers = {'Referer': 'https://dnsdumpster.com/'}
     data = {'csrfmiddlewaretoken': csrf_token, 'targetip': domain}
     response = requests.Session().post('https://dnsdumpster.com/',
-                                       cookies=cookies, data=data, headers=headers)
-    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
+                                       cookies=cookies, data=data, headers=headers, verify=False)
+    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain, verify=False)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         tables = soup.findAll('table')
