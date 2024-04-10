@@ -56,6 +56,11 @@ def parser_error(errmsg):
     print(R + "Error: " + errmsg + W)
     sys.exit()
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # E X A M P L E - I N P U T  I N - C O N F I G U R A T I O N S  # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# --url afganii.fun --exploit --cms --domain-info --dns --output data.json --dork-list all  #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def parse_args():
     parser = argparse.ArgumentParser()
