@@ -88,16 +88,18 @@ def dnsdumper(url):
         res = {}
         res['domain'] = domain
         res['dns_records'] = {}
-        res['dns_records']['dns'] = results(tables[0])
-        res['dns_records']['mx'] = results(tables[1])
-        print(' %s Search for DNS Servers' % que)
-        for entry in res['dns_records']['dns']:
-            print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
-                **entry) % (good, good, good, bannerblue, end)))
-        print(' %s Search for MX Records ' % que)
-        for entry in res['dns_records']['mx']:
-            print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
-                **entry) % (good, good, good, bannerblue, end)))
+        if len(tables) > 0:
+            res['dns_records']['dns'] = results(tables[0])
+            if len(tables) > 1:
+                res['dns_records']['mx'] = results(tables[1])
+            print(' %s Search for DNS Servers' % que)
+            for entry in res['dns_records']['dns']:
+                print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
+                    **entry) % (good, good, good, bannerblue, end)))
+            print(' %s Search for MX Records ' % que)
+            for entry in res['dns_records']['mx']:
+                print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
+                    **entry) % (good, good, good, bannerblue, end)))
 
 
 def domain_info(url):
