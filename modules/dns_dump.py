@@ -82,10 +82,10 @@ def dnsdumper(url):
     response = requests.Session().post('https://dnsdumpster.com/',
                                        cookies=cookies, data=data, headers=headers, verify=False)
     image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain, verify=False)
+    res = {}
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         tables = soup.findAll('table')
-        res = {}
         res['domain'] = domain
         res['dns_records'] = {}
         if len(tables) > 0:
@@ -100,6 +100,12 @@ def dnsdumper(url):
             for entry in res['dns_records']['mx']:
                 print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
                     **entry) % (good, good, good, bannerblue, end)))
+
+    global all_data1
+    all_data1 = {
+        "csrftoken": cookies['csrftoken']
+    }
+    all_data1.update(res)
 
 
 def domain_info(url):
@@ -119,10 +125,10 @@ def domain_info(url):
     response = requests.Session().post('https://dnsdumpster.com/',
                                        cookies=cookies, data=data, headers=headers, verify=False)
     image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain, verify=False)
+    res = {}
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         tables = soup.findAll('table')
-        res = {}
         res['domain'] = domain
         res['dns_records'] = {}
         res['dns_records']['host'] = results(tables[3])
@@ -130,3 +136,17 @@ def domain_info(url):
         for entry in res['dns_records']['host']:
             print((" %s SubDomain : {domain} \n %s IP : {ip} \n %s----------------%s".format(
                 **entry) % (good, good, bannerblue, end)))
+    global all_data2
+    all_data2 = {
+        "csrftoken": cookies['csrftoken']
+    }
+    all_data2.update(res)
+
+
+def all_data_1():
+    global all_data1
+    return all_data1
+
+def all_data_2():
+    global all_data2
+    return all_data2

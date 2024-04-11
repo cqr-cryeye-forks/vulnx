@@ -41,10 +41,14 @@ class ScanPort():
     def portscan(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.port:
-            result = sock.connect_ex((hostd(self.url), self.port))
-            if result == 0:
-                print(' {} {}                    {}   {}'
-                    .format(que, self.port, portopen, portsobject[self.port]))
-            else:
-                print(' {} {}                    {}   {}'
-                    .format(que, self.port, portclose, portsobject[self.port]))
+            # self.port = int(self.port)
+            for key, value in portsobject.items():
+                self.port = key
+                print(self.port)
+                result = sock.connect_ex((hostd(self.url), self.port))
+                if result == 0:
+                    print(' {} {}                    {}   {}'
+                        .format(que, self.port, portopen, portsobject[self.port]))
+                else:
+                    print(' {} {}                    {}   {}'
+                        .format(que, self.port, portclose, portsobject[self.port]))

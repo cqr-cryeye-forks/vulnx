@@ -42,10 +42,12 @@ class GatherHost():
         regex_date = r'Date: (.+?)-(.+?)'
         regex_date = re.compile(regex_date)
         matches = re.search(regex_date, getinfo)
+        print("MATCHES in web_host", matches)
         try:
             if matches:
                 print(' {0} Domain Created on : {1}'.format(good, matches.group(1)))
                 ip = socket.gethostbyname(hostd(self.url))
+                print("YOUR IP:", ip)
                 print(' {0} CloudFlare IP : {1}'.format(good, ip))
                 ipinfo = "http://ipinfo.io/" + ip + "/json"
                 gather = requests.get(ipinfo, self.headers, verify=False).text

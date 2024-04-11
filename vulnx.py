@@ -6,6 +6,8 @@ import json
 import pathlib
 from typing import Final
 
+from modules.dns_dump import all_data_1, all_data_2
+
 """
 The vulnx main part.
 Author: anouarbensaad
@@ -35,11 +37,11 @@ import signal
 import requests
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # E X A M P L E - I N P U T  I N - C O N F I G U R A T I O N S  # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# --url afganii.fun --exploit --cms --domain-info --dns --output data.json --dork-list all  #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # E X A M P L E - I N P U T - I N - C O N F I G U R A T I O N S # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# --url afganii.fun --exploit --cms --domain-info --dns --output data.json --dork-list all --ports  #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def parser_error(errmsg):
     print("Usage: python " + sys.argv[0] + " [Options] use -h for help")
@@ -73,12 +75,12 @@ def main():
                         choices=['wordpress', 'prestashop', 'joomla', 'lokomedia', 'drupal', 'all'])
     # Switches
     parser.add_argument('--ports', help='ports to scan', action='store_true')
-    parser.add_argument('--exploit', help='searching vulnerability & run exploits', dest='exploit', action='store_true')
     parser.add_argument('--it', help='interactive mode.', dest='cli', action='store_true')
-    parser.add_argument('--cms', help='search cms info[themes,plugins,user,version..]', dest='cms', action='store_true')
     parser.add_argument('--web-info', help='web informations gathering', dest='webinfo', action='store_true')
-    parser.add_argument('--domain-info', help='subdomains informations gathering', dest='subdomains',
-                        action='store_true')
+
+    parser.add_argument('--exploit', help='searching vulnerability & run exploits', dest='exploit', action='store_true')
+    parser.add_argument('--cms', help='search cms info[themes,plugins,user,version..]', dest='cms', action='store_true')
+    parser.add_argument('--domain-info', help='subdomains informations gathering', dest='subdomains', action='store_true')
     parser.add_argument('--dns', help='dns informations gatherings', dest='dnsdump', action='store_true')
 
     args = parser.parse_args()
@@ -156,7 +158,10 @@ def main():
 
     result = CMS(url)
     data = result.global_cms()
-
+    data_list = []
+    data_list.append(all_data_1())
+    data_list.append(all_data_2())
+    data.update({"data_list": data_list})
     with open(output_json, "w") as jf:
         json.dump(data, jf, indent=2)
     # if inputfile:

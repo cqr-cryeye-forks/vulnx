@@ -5,6 +5,7 @@ def drupal_version(url,headers):
     response = requests.get(url, headers, verify=False).text
     try:
         matches = re.compile(r'Drupal \d{0,10}').findall(response)
+        print("matches in drupal_version", matches)
         if len(matches) > 0 and matches[0] != None and matches[0] != "":
             version = matches[0]
             print('%s [+] Drupal Version : %s %s' % (G, version, W))
@@ -18,6 +19,7 @@ def prestashop_version(url,headers):
     response = requests.get(url, headers, verify=False).text
     try:
         matches = re.compile(r'Prestashop \d{0,9}').findall(response.text)
+        print("MATCHES in prestashop_version: ", matches)
         if len(matches) > 0 and matches[0] != None and matches[0] != "":
             version = matches[0]
             return print('%s [+] Prestashop Version : %s %s' % (G, version, W))
