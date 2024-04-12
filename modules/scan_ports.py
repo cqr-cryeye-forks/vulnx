@@ -26,12 +26,13 @@ portsobject = {
     220: 'IMAP3',
     389: 'LDAP',
     443: 'SSL',
-    1521: 'Oracle SQL',
+    1521: 'Oracle_SQL',
     2049: 'NFS',
     3306: 'mySQL',
     5800: 'VNC',
     8080: 'HTTP',
 }
+port_data_info = {}
 
 class ScanPort():
     def __init__(self,url,port):
@@ -49,6 +50,8 @@ class ScanPort():
                 if result == 0:
                     print(' {} {}                    {}   {}'
                         .format(que, self.port, portopen, portsobject[self.port]))
+                    port_data_info.update({f"{self.port}_{value}": "OPEN"})
                 else:
                     print(' {} {}                    {}   {}'
                         .format(que, self.port, portclose, portsobject[self.port]))
+                    port_data_info.update({f"{self.port}_{value}": "CLOSE"})

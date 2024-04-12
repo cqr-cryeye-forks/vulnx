@@ -72,9 +72,12 @@ def dnsdumper(url):
     try:
         csrf_token = soup.findAll(
             'input', attrs={'name': 'csrfmiddlewaretoken'})[0]['value']
-    except AttributeError:  # No match is found
-        csrf_token = soup.findAll(
-            'input', attrs={'name': 'csrfmiddlewaretoken'})[0]['value']
+    except IndexError:  # No match is found
+        # csrf_token = soup.findAll(
+        #     'input', attrs={'name': 'csrfmiddlewaretoken'})[0]['value']
+        pass
+    csrf_token = csrf_token or None
+
     print(' %s Retrieved token: %s' % (info, csrf_token))
     cookies = {'csrftoken': csrf_token}
     headers = {'Referer': 'https://dnsdumpster.com/'}

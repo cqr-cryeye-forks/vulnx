@@ -156,12 +156,14 @@ def main():
     MAIN_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
     output_json: str = MAIN_DIR / output
 
+    from modules.scan_ports import port_data_info
     result = CMS(url)
     data = result.global_cms()
     data_list = []
     data_list.append(all_data_1())
     data_list.append(all_data_2())
     data.update({"data_list": data_list})
+    data.update({"Ports": port_data_info})
     with open(output_json, "w") as jf:
         json.dump(data, jf, indent=2)
     # if inputfile:
