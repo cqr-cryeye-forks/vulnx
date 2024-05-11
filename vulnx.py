@@ -119,7 +119,10 @@ def detection():
         dnsdump=args.dnsdump,
         port=args.scanports
     )
-    res1, res2, res3 = instance.instanciate()
+    try:
+        res1, res2, res3 = instance.instanciate()
+    except Exception as e:
+        return {}, {}, {}
     return res1, res2, res3
 
 
@@ -179,11 +182,16 @@ if __name__ == "__main__":
 
     from modules.scan_ports import port_data_info
 
-    data = {
-        "res1": res1,
-        "res2": res2,
-        "res3": res3,
-        "Ports": port_data_info,
-    }
+    if res1 == {} and res2 == {} and res3 == {}:
+        data = {
+            "Error": "VulnX failed to connect"
+        }
+    else:
+        data = {
+            "res1": res1,
+            "res2": res2,
+            "res3": res3,
+            "Ports": port_data_info,
+        }
     with open(output_json, "w") as jf:
         json.dump(data, jf, indent=2)
