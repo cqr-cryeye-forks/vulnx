@@ -1,6 +1,4 @@
-
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -51,7 +49,6 @@ def text_record(table):
 
 
 def dnsdumper(url):
-
     '''
     For DNS Dump you retrieve token from dnsdumpster.
     V   T    X
@@ -63,58 +60,50 @@ def dnsdumper(url):
     L
     Schema V, returns set of (U, L, N, T, X)
     '''
-    
+
     domain = hostd(url)
     dnsdumpster_url = 'https://dnsdumpster.com/'
-    response = requests.Session().get(dnsdumpster_url, verify=False)
+    response = requests.Session().get(dnsdumpster_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     # If no match is found, the return object won't have group method, so check.
     try:
         csrf_token = soup.findAll(
             'input', attrs={'name': 'csrfmiddlewaretoken'})[0]['value']
-    except IndexError:  # No match is found
-        # csrf_token = soup.findAll(
-        #     'input', attrs={'name': 'csrfmiddlewaretoken'})[0]['value']
-        pass
-    csrf_token = csrf_token or None
-
+    except AttributeError:  # No match is found
+        csrf_token = soup.findAll(
+            'input', attrs={'name': 'csrfmiddlewaretoken'})[0]['value']
     print(' %s Retrieved token: %s' % (info, csrf_token))
     cookies = {'csrftoken': csrf_token}
     headers = {'Referer': 'https://dnsdumpster.com/'}
-    data = {'csrfmiddlewaretoken': csrf_token, 'targetip': domain}
+    data = {'csrfmiddlewaretoken': csrf_token, 'targetip': domain, 'user': 'free'}
     response = requests.Session().post('https://dnsdumpster.com/',
-                                       cookies=cookies, data=data, headers=headers, verify=False)
-    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain, verify=False)
-    res = {}
+                                       cookies=cookies, data=data, headers=headers)
+    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         tables = soup.findAll('table')
+        res = {}
         res['domain'] = domain
         res['dns_records'] = {}
-        if len(tables) > 0:
-            res['dns_records']['dns'] = results(tables[0])
-            if len(tables) > 1:
-                res['dns_records']['mx'] = results(tables[1])
-            print(' %s Search for DNS Servers' % que)
-            for entry in res['dns_records']['dns']:
-                print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
-                    **entry) % (good, good, good, bannerblue, end)))
-            print(' %s Search for MX Records ' % que)
-            for entry in res['dns_records']['mx']:
-                print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
-                    **entry) % (good, good, good, bannerblue, end)))
+        res['dns_records']['dns'] = results(tables[0])
+        res['dns_records']['mx'] = results(tables[1])
+        print(' %s Search for DNS Servers' % que)
+        for entry in res['dns_records']['dns']:
+            print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
+                **entry) % (good, good, good, bannerblue, end)))
 
-    global all_data1
-    all_data1 = {
-        "csrftoken": cookies['csrftoken']
-    }
-    all_data1.update(res)
+        print(' %s Search for MX Records ' % que)
+        for entry in res['dns_records']['mx']:
+            print((" %s Host : {domain} \n %s IP : {ip} \n %s AS : {as} \n  %s----------------%s".format(
+                **entry) % (good, good, good, bannerblue, end)))
+        return res
+    return None
 
 
 def domain_info(url):
     domain = hostd(url)
     dnsdumpster_url = 'https://dnsdumpster.com/'
-    response = requests.Session().get(dnsdumpster_url, verify=False).text
+    response = requests.Session().get(dnsdumpster_url).text
     # If no match is found, the return object won't have group method, so check.
     try:
         csrf_token = re.search(
@@ -126,12 +115,12 @@ def domain_info(url):
     headers = {'Referer': 'https://dnsdumpster.com/'}
     data = {'csrfmiddlewaretoken': csrf_token, 'targetip': domain}
     response = requests.Session().post('https://dnsdumpster.com/',
-                                       cookies=cookies, data=data, headers=headers, verify=False)
-    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain, verify=False)
-    res = {}
+                                       cookies=cookies, data=data, headers=headers)
+    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         tables = soup.findAll('table')
+        res = {}
         res['domain'] = domain
         res['dns_records'] = {}
         res['dns_records']['host'] = results(tables[3])
@@ -139,17 +128,5 @@ def domain_info(url):
         for entry in res['dns_records']['host']:
             print((" %s SubDomain : {domain} \n %s IP : {ip} \n %s----------------%s".format(
                 **entry) % (good, good, bannerblue, end)))
-    global all_data2
-    all_data2 = {
-        "csrftoken": cookies['csrftoken']
-    }
-    all_data2.update(res)
-
-
-def all_data_1():
-    global all_data1
-    return all_data1
-
-def all_data_2():
-    global all_data2
-    return all_data2
+        return res
+    return None

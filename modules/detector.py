@@ -86,7 +86,7 @@ class CMS(object):
         """
         if re.search(re.compile(
                 r'<script type=\"text/javascript\" src=\"/media/system/js/mootools.js\"></script>|/media/system/js/|com_content|Joomla!'),
-                     self.__getcontent__()):
+                self.__getcontent__()):
             name = 'Joomla'
             return name
 
@@ -133,6 +133,7 @@ class CMS(object):
         return result
 
     def instanciate(self):
+        res1, res2, res3 = None, None, None
         init_time = time.time()
         cms = self.serialize()
         if cms['name']:
@@ -144,10 +145,7 @@ class CMS(object):
             if cms['exploit']:
                 print("{0} −−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−".format(W))
                 print(' {0} Exploits Scan'.format(run))
-                try:
-                    instance.exploit()
-                except Exception as e:
-                    pass
+                instance.exploit()
             if cms['webinfo']:
                 print("{0} −−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−".format(W))
                 print(' {0} OS / Server Information'.format(run))
@@ -162,15 +160,13 @@ class CMS(object):
                 instance.cmsinfo()
                 print("{0} −−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−".format(W))
             if cms['dnsdump']:
-                instance.dnsdump()
+                res1 = instance.dnsdump()
             if cms['domain']:
-                instance.domaininfo()
+                res2 = instance.domaininfo()
             if cms['port']:
                 instance.ports(cms['port'])
+            res3 = cms
         end_time = time.time()
         elapsed_time = end_time - init_time
         print('\n %s[%s Elapsed Time %s]%s => %.2f seconds ' % (Y, W, Y, W, elapsed_time))
-
-    def global_cms(self):
-        cms = self.serialize()
-        return cms
+        return res1, res2, res3

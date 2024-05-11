@@ -1,5 +1,4 @@
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -30,12 +29,12 @@ portsobject = {
     2049: 'NFS',
     3306: 'mySQL',
     5800: 'VNC',
-    8080: 'HTTP',
 }
 port_data_info = {}
 
+
 class ScanPort():
-    def __init__(self,url,port):
+    def __init__(self, url, port):
         self.url = url
         self.port = port
 
@@ -48,10 +47,8 @@ class ScanPort():
                 print(self.port)
                 result = sock.connect_ex((hostd(self.url), self.port))
                 if result == 0:
-                    print(' {} {}                    {}   {}'
-                        .format(que, self.port, portopen, portsobject[self.port]))
-                    port_data_info.update({f"{self.port}_{value}": "OPEN"})
+                    print(que, self.port, portopen, portsobject[self.port])
+                    port_data_info.update({f"{value}": "OPEN"})
                 else:
-                    print(' {} {}                    {}   {}'
-                        .format(que, self.port, portclose, portsobject[self.port]))
-                    port_data_info.update({f"{self.port}_{value}": "CLOSE"})
+                    print(que, self.port, portclose, portsobject[self.port])
+                    port_data_info.update({f"{value}": "CLOSE"})

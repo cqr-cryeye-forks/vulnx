@@ -6,8 +6,6 @@ import json
 import pathlib
 from typing import Final
 
-from modules.dns_dump import all_data_1, all_data_2
-
 """
 The vulnx main part.
 Author: anouarbensaad
@@ -36,12 +34,22 @@ import warnings
 import signal
 import requests
 
+HEADERS = {
+    'User-Agent': random_UserAgent(),
+    'Content-type': '*/*',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Connection': 'keep-alive',
+}
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # E X A M P L E - I N P U T - I N - C O N F I G U R A T I O N S # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# --url afganii.fun --exploit --cms --domain-info --dns --output data.json --dork-list all --ports  #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+warnings.filterwarnings(
+    action="ignore", message=".*was already imported", category=UserWarning)
+warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+
+# cleaning screen
+
+banner()
+
 
 def parser_error(errmsg):
     print("Usage: python " + sys.argv[0] + " [Options] use -h for help")
@@ -49,152 +57,133 @@ def parser_error(errmsg):
     sys.exit()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        epilog='\tExample: \r\npython ' + sys.argv[0] + " -u google.com")
+    parser.error = parser_error
+    parser._optionals.title = "\nOPTIONS"
+    parser.add_argument('-u', '--url', help="url target to scan")
+    parser.add_argument(
+        '-D', '--dorks', help='search webs with dorks', dest='dorks', type=str)
+    # parser.add_argument(
+    #     '-o', '--output', help='specify output directory', required=False)
+    parser.add_argument('-n', '--number-pages',
+                        help='search dorks number page limit', dest='numberpage', type=int)
+    parser.add_argument('-i', '--input', help='specify input file of domains to scan', dest='input_file',
+                        required=False)
+    parser.add_argument('-l', '--dork-list', help='list names of dorks exploits', dest='dorkslist',
+                        choices=['wordpress', 'prestashop', 'joomla', 'lokomedia', 'drupal', 'all'])
+    parser.add_argument('-p', '--ports', help='ports to scan',
+                        dest='scanports', action='store_true')
+    # Switches
+    parser.add_argument('-e', '--exploit', help='searching vulnerability & run exploits',
+                        dest='exploit', action='store_true')
+    parser.add_argument('--output', help='Output file, save to json format, Example=data.json')
+
+    parser.add_argument('--it', help='interactive mode.',
+                        dest='cli', action='store_true')
+
+    parser.add_argument('--cms', help='search cms info[themes,plugins,user,version..]',
+                        dest='cms', action='store_true')
+
+    parser.add_argument('-w', '--web-info', help='web informations gathering',
+                        dest='webinfo', action='store_true')
+    parser.add_argument('-d', '--domain-info', help='subdomains informations gathering',
+                        dest='subdomains', action='store_true')
+    parser.add_argument('--dns', help='dns informations gatherings',
+                        dest='dnsdump', action='store_true')
+
+    return parser.parse_args()
+
+
+# args declaration
+args = parse_args()
+# url arg
+url = args.url
+# input_file
+input_file = args.input_file
+# Disable SSL related warnings
+warnings.filterwarnings('ignore')
+output = args.output
+
+
+def detection():
+    instance = CMS(
+        url,
+        headers=HEADERS,
+        exploit=args.exploit,
+        domain=args.subdomains,
+        webinfo=args.webinfo,
+        serveros=True,
+        cmsinfo=args.cms,
+        dnsdump=args.dnsdump,
+        port=args.scanports
+    )
+    res1, res2, res3 = instance.instanciate()
+    return res1, res2, res3
+
+
+def dork_engine():
+    if args.dorks:
+        DEngine = Dork(
+            exploit=args.dorks,
+            headers=HEADERS,
+            pages=(args.numberpage or 1)
+        )
+        DEngine.search()
+
+
+def dorks_manual():
+    if args.dorkslist:
+        DManual = DorkManual(
+            select=args.dorkslist
+        )
+        DManual.list()
+
+
+def interactive_cli():
+    if args.cli:
+        cli = CLI(headers=HEADERS)
+        cli.general("")
+
+
 def signal_handler(signal, frame):
     print("%s(ID: {}) Cleaning up...\n Exiting...".format(signal) % (W))
     exit(0)
 
 
-def main():
-    HEADERS = {
-        'User-Agent': random_UserAgent(),
-        'Content-type': '*/*',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
-    }
+signal.signal(signal.SIGINT, signal_handler)
 
-    parser = argparse.ArgumentParser()
-    parser.error = parser_error
-
-    parser.add_argument('--url', help="url target to scan")
-    parser.add_argument('--dorks', help='search webs with dorks')
-    parser.add_argument('--output', help='specify output directory')
-    parser.add_argument('--number-pages', help='search dorks number page limit', dest='numberpage')
-    # parser.add_argument('--inputfile', help='specify input file of domains to scan', required=False)
-    parser.add_argument('--dorkslist', help='list names of dorks exploits',
-                        choices=['wordpress', 'prestashop', 'joomla', 'lokomedia', 'drupal', 'all'])
-    # Switches
-    parser.add_argument('--ports', help='ports to scan', action='store_true')
-    parser.add_argument('--it', help='interactive mode.', dest='cli', action='store_true')
-    parser.add_argument('--web-info', help='web informations gathering', dest='webinfo', action='store_true')
-
-    parser.add_argument('--exploit', help='searching vulnerability & run exploits', dest='exploit', action='store_true')
-    parser.add_argument('--cms', help='search cms info[themes,plugins,user,version..]', dest='cms', action='store_true')
-    parser.add_argument('--domain-info', help='subdomains informations gathering', dest='subdomains', action='store_true')
-    parser.add_argument('--dns', help='dns informations gatherings', dest='dnsdump', action='store_true')
-
-    args = parser.parse_args()
-
-    url: str = args.url
-    output: str = args.output
-
-    dorks: str = args.dorks
-    dorks_list: str = args.dorkslist
-    cli: str = args.cli
-    number_pages: int = args.numberpage
-    # inputfile: str = args.inputfile
-    ports: int = args.ports
-    exploit: str = args.exploit
-    subdomains: str = args.subdomains
-    webinfo: str = args.webinfo
-    cms: str = args.cms
-    dnsdump: str = args.dnsdump
-
-    MAIN_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
-    output_json: MAIN_DIR / output
-
-    warnings.filterwarnings('ignore')
-
-    signal.signal(signal.SIGINT, signal_handler)
-
-    warnings.filterwarnings(
-        action="ignore", message=".*was already imported", category=UserWarning)
-    warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-
-    # dork_engine
-    if dorks:
-        DEngine = Dork(
-            exploit=dorks,
-            headers=HEADERS,
-            pages=(number_pages or 1)
-        )
-        DEngine.search()
-    # dorks_manual
-    if dorks_list:
-        DManual = DorkManual(
-            select=dorks_list
-        )
-        DManual.list()
-    # interactive_cli
-    if cli:
-        cli = CLI(headers=HEADERS)
-        cli.general("")
+if __name__ == "__main__":
+    res1 = {}
+    res2 = {}
+    res3 = {}
+    dork_engine()
+    dorks_manual()
+    interactive_cli()
 
     if url:
         root = url
         if root.startswith('http://'):
             url = root
         elif root.startswith('https://'):
-            url = root.replace('https://', 'http://')
+            url = root
+            # url=root.replace('https://','http://')
         else:
-            url = 'http://' + root
-
-    # detection
-    instance = CMS(
-        url,
-        headers=HEADERS,
-        exploit=exploit,
-        domain=subdomains,
-        webinfo=webinfo,
-        serveros=True,
-        cmsinfo=cms,
-        dnsdump=dnsdump,
-        port=ports
-    )
-    instance.instanciate()
+            url = 'https://' + root
+            print(url)
+        res1, res2, res3 = detection()
 
     MAIN_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
     output_json: str = MAIN_DIR / output
 
     from modules.scan_ports import port_data_info
-    result = CMS(url)
-    data = result.global_cms()
-    data_list = []
-    data_list.append(all_data_1())
-    data_list.append(all_data_2())
-    data.update({"data_list": data_list})
-    data.update({"Ports": port_data_info})
+
+    data = {
+        "res1": res1,
+        "res2": res2,
+        "res3": res3,
+        "Ports": port_data_info,
+    }
     with open(output_json, "w") as jf:
         json.dump(data, jf, indent=2)
-    # if inputfile:
-    #     with open(inputfile, 'r') as urls:
-    #         u_array = [url.strip('\n') for url in urls]
-    #         try:
-    #             for url in u_array:
-    #                 root = url
-    #                 # url condition entrypoint
-    #                 if root.startswith('http'):
-    #                     url = root
-    #                 else:
-    #                     url = 'http://' + root
-    #                 instance = CMS(
-    #                     url,
-    #                     headers=HEADERS,
-    #                     exploit=exploit,
-    #                     domain=subdomains,
-    #                     webinfo=webinfo,
-    #                     serveros=True,
-    #                     cmsinfo=cms,
-    #                     dnsdump=dnsdump,
-    #                     port=ports
-    #                 )
-    #
-    #                 instance.instanciate()
-    #                 urls.close()
-    #         except Exception as e:
-    #             print('Error : ', e)
-
-
-if __name__ == "__main__":
-    main()
-
