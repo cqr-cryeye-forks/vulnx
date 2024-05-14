@@ -22,7 +22,7 @@ from common.colors import red, green, bg, G, R, W, Y, G, good, bad, run, info, e
 
 from common.requestUp import random_UserAgent
 from common.uriParser import parsing_url as hostd
-from common.banner import banner
+# from common.banner import banner
 
 import sys
 import argparse
@@ -48,7 +48,7 @@ warnings.filterwarnings(action="ignore", category=DeprecationWarning)
 
 # cleaning screen
 
-banner()
+# banner()
 
 
 def parser_error(errmsg):
@@ -96,17 +96,6 @@ def parse_args():
     return parser.parse_args()
 
 
-# args declaration
-args = parse_args()
-# url arg
-url = args.url
-# input_file
-input_file = args.input_file
-# Disable SSL related warnings
-warnings.filterwarnings('ignore')
-output = args.output
-
-
 def detection():
     instance = CMS(
         url,
@@ -152,7 +141,7 @@ def interactive_cli():
 
 def signal_handler(signal, frame):
     print("%s(ID: {}) Cleaning up...\n Exiting...".format(signal) % (W))
-    exit(0)
+    exit()
 
 
 signal.signal(signal.SIGINT, signal_handler)
@@ -164,6 +153,16 @@ if __name__ == "__main__":
     dork_engine()
     dorks_manual()
     interactive_cli()
+
+    # args declaration
+    args = parse_args()
+    # url arg
+    url = args.url
+    # input_file
+    input_file = args.input_file
+    # Disable SSL related warnings
+    warnings.filterwarnings('ignore')
+    output = args.output
 
     if url:
         root = url
@@ -178,7 +177,7 @@ if __name__ == "__main__":
         res1, res2, res3 = detection()
 
     MAIN_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
-    output_json: str = MAIN_DIR / output
+    output_json: Final[pathlib.Path] = MAIN_DIR / output
 
     from modules.scan_ports import port_data_info
 
