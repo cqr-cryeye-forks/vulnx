@@ -96,6 +96,17 @@ def parse_args():
     return parser.parse_args()
 
 
+# args declaration
+args = parse_args()
+# url arg
+url = args.url
+# input_file
+input_file = args.input_file
+# Disable SSL related warnings
+warnings.filterwarnings('ignore')
+output = args.output
+
+
 def detection():
     instance = CMS(
         url,
@@ -153,16 +164,6 @@ if __name__ == "__main__":
     dork_engine()
     dorks_manual()
     interactive_cli()
-
-    # args declaration
-    args = parse_args()
-    # url arg
-    url = args.url
-    # input_file
-    input_file = args.input_file
-    # Disable SSL related warnings
-    warnings.filterwarnings('ignore')
-    output = args.output
 
     if url:
         root = url
