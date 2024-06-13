@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import json
 import pathlib
+import time
 from typing import Final
 
 """
@@ -46,22 +47,18 @@ warnings.filterwarnings(
     action="ignore", message=".*was already imported", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
 
+
 # cleaning screen
 
 # banner()
 
 
 def parser_error(errmsg):
-    print("Usage: python " + sys.argv[0] + " [Options] use -h for help")
-    print(R + "Error: " + errmsg + W)
-    sys.exit()
+    exit("parser_error")
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        epilog='\tExample: \r\npython ' + sys.argv[0] + " -u google.com")
-    parser.error = parser_error
-    parser._optionals.title = "\nOPTIONS"
+    parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--url', help="url target to scan")
     parser.add_argument(
         '-D', '--dorks', help='search webs with dorks', dest='dorks', type=str)
@@ -122,6 +119,9 @@ def detection():
     try:
         res1, res2, res3 = instance.instanciate()
     except Exception as e:
+        print(e)
+        if str(e) == "[Errno -2] Name or service not known" or "HTTPSConnectionPool" in str(e):
+            return {"Error -2": "Name or service not known, use other port to scan"}, {}, {}
         return {}, {}, {}
     return res1, res2, res3
 
@@ -157,6 +157,27 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+
+def has_port_ip(ip_with_port: str) -> bool:
+    pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$")
+    return bool(pattern.match(ip_with_port))
+
+
+def has_port_http(url: str) -> bool:
+    pattern = re.compile(r"^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+")
+    return bool(pattern.match(url))
+
+
+def get_port_ip(ip_with_port: str):
+    match = ip_with_port.split(':')[-1]
+    return match
+
+
+def get_port_http(url: str):
+    match = url.split(':')[-1]
+    return match
+
+
 if __name__ == "__main__":
     res1 = {}
     res2 = {}
@@ -166,23 +187,38 @@ if __name__ == "__main__":
     interactive_cli()
 
     if url:
+
+        print(has_port_ip(url))
+        print(has_port_http(url))
+
+        if has_port_ip(url):
+            args.scanports = int(get_port_ip(url))
+        elif has_port_http(url):
+            args.scanports = int(get_port_http(url))
+
+        print(args.scanports)
+
         root = url
         if root.startswith('http://'):
             url = root
         elif root.startswith('https://'):
             url = root
-            # url=root.replace('https://','http://')
+            # url = root.replace('https://', 'http://')
         else:
             url = 'https://' + root
             print(url)
-        res1, res2, res3 = detection()
 
+        res1, res2, res3 = detection()
+    print(res1, res2, res3)
     MAIN_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent
     output_json: Final[pathlib.Path] = MAIN_DIR / output
 
     from modules.scan_ports import port_data_info
-
-    if res1 == {} and res2 == {} and res3 == {}:
+    if res1 == {"Error -2": "Name or service not known, use other port to scan"}:
+        data = {
+            "Error": "Name or service not known, use other port to scan"
+        }
+    elif res1 == {} and res2 == {} and res3 == {}:
         data = {
             "Error": "VulnX failed to connect"
         }

@@ -40,8 +40,7 @@ class ScanPort():
 
     def portscan(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if self.port:
-            # self.port = int(self.port)
+        if self.port == True:
             for key, value in portsobject.items():
                 self.port = key
                 print(self.port)
@@ -52,3 +51,12 @@ class ScanPort():
                 else:
                     print(que, self.port, portclose, portsobject[self.port])
                     port_data_info.update({f"{value}": "CLOSE"})
+        else:
+            self.port = int(self.port)
+            result = sock.connect_ex((hostd(self.url), self.port))
+            if result == 0:
+                print(que, self.port, portopen, portsobject[self.port])
+                port_data_info.update({"Port": "OPEN"})
+            else:
+                print(que, self.port, portclose, portsobject[self.port])
+                port_data_info.update({"Port": "CLOSE"})
