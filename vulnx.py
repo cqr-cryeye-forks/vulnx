@@ -188,15 +188,15 @@ if __name__ == "__main__":
 
     if url:
 
-        print(has_port_ip(url))
-        print(has_port_http(url))
+        print("has_port_ip -", has_port_ip(url))
+        print("has_port_http -", has_port_http(url))
 
         if has_port_ip(url):
             args.scanports = int(get_port_ip(url))
         elif has_port_http(url):
             args.scanports = int(get_port_http(url))
 
-        print(args.scanports)
+        print("Port -", args.scanports)
 
         root = url
         if root.startswith('http://'):
